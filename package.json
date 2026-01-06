@@ -1,0 +1,7 @@
+{
+  "name": "slws-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

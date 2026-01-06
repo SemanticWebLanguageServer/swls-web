@@ -1,0 +1,31 @@
+{
+  "name": "swls-codemirror",
+  "version": "0.0.2",
+  "main": "lib/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "files": [
+    "lib/*"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@codingame/monaco-vscode-api": "^23.2.2",
+    "monaco-languageclient": "~10.4.0",
+    "vscode-languageserver": "~9.0.1",
+    "swls-wasm": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  }
+}

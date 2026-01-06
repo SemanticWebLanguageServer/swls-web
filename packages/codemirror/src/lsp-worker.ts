@@ -1,6 +1,6 @@
 let initialized = false;
-let send_to_lsp;
-async function handleIncomingMessage(event) {
+let send_to_lsp: (frame: string) => void;
+async function handleIncomingMessage(event: MessageEvent) {
   await ensureLspLoaded();
 
   const payload =
@@ -12,13 +12,13 @@ async function handleIncomingMessage(event) {
 
 class LspDeframer {
   buffer = "";
-  onMessage;
+  onMessage: (msg: any) => void;
 
-  constructor(onMessage) {
+  constructor(onMessage: (msg: any) => void) {
     this.onMessage = onMessage;
   }
 
-  push(data) {
+  push(data: string) {
     this.buffer += data;
 
     while (true) {
@@ -61,7 +61,7 @@ let deframer = new LspDeframer((msg) => {
 async function ensureLspLoaded() {
   if (!initialized) {
     console.log("[worker] importing swls-web…");
-    const mod = await import("swls-web");
+    const mod = await import("swls-wasm");
     console.dir(mod);
     const t = new mod.WasmLsp((x) => deframer.push(x));
     initialized = true;

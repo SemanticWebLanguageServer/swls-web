@@ -1,5 +1,5 @@
 [package]
-name = "swls-web"
+name = "swls-wasm"
 version = "0.1.0"
 authors = ["ajuvercr <arthur.vercruysse@outlook.com>"]
 edition = "2018"

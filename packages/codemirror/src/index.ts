@@ -17,12 +17,15 @@ import {
 } from "monaco-languageclient/vscodeApiWrapper";
 import { ILanguageExtensionPoint } from "@codingame/monaco-vscode-api/vscode/vs/editor/common/languages/language";
 import { editor } from "@codingame/monaco-vscode-editor-api";
-import { LanguagesRegistry } from "@codingame/monaco-vscode-api/vscode/vs/editor/common/services/languagesRegistry";
 
 import * as monaco from "@codingame/monaco-vscode-editor-api";
+import { URI } from "@codingame/monaco-vscode-api/vscode/vs/base/common/uri";
 
 const workerUrl = "./lsp-worker.js";
 
+/**
+ * Default way to setup the vscode api, adding turtle, sparql and jsonld extensions.
+ */
 export async function setupVscodeApi() {
   // Setup the default VSCode API wrapper
   const vscodeApiConfig: MonacoVscodeApiConfig = {
@@ -49,8 +52,14 @@ export async function setupVscodeApi() {
   monaco.languages.register(jsonLdExtension);
 }
 
-export async function setupLsp(...languageIds: string[]) {
-  const worker = new Worker(new URL(workerUrl, import.meta.url), {
+/**
+ * Sets up the semantic web language server that can handle the provided language ids.
+ */
+export async function setupLsp(
+  url: URL = new URL(workerUrl, import.meta.url),
+  ...languageIds: string[]
+): Promise<LanguageClientWrapper> {
+  const worker = new Worker(url, {
     type: "module",
   });
   const reader = new BrowserMessageReader(worker);
@@ -73,13 +82,7 @@ export async function setupLsp(...languageIds: string[]) {
   // Start language client wrapper
   const languageClientWrapper = new LanguageClientWrapper(languageClientConfig);
   await languageClientWrapper.start();
-
-  languageClientWrapper
-    .getLanguageClient()
-    .onRequest("custom/readFile", (a, b, c) => {
-      console.log({ a, b, c });
-      throw "nah";
-    });
+  return languageClientWrapper;
 }
 
 export const turtleExtension: ILanguageExtensionPoint = {
@@ -106,6 +109,9 @@ export const sparqlLdExtension: ILanguageExtensionPoint = {
   ],
 };
 
+/**
+ * Adds an editor to the html element
+ */
 export async function addEditor(
   uri: string,
   code: string,
@@ -114,33 +120,13 @@ export async function addEditor(
 ): Promise<EditorApp> {
   const editorAppConfig: EditorAppConfig = {
     codeResources: {},
-    // languageDef: { languageExtensionConfig: extension },
   };
 
   const editorApp = new EditorApp(editorAppConfig);
 
   await editorApp.start(container);
 
-  const model = editor.createModel("ex:a ex:b ex:c .", "turtle");
-  editorApp.getEditor().setModel(model);
+  const model = editor.createModel(code, extension.id, URI.parse(uri));
+  editorApp.getEditor()!.setModel(model);
   return editorApp;
 }
-
-export const runClient = async () => {
-  await setupVscodeApi();
-
-  const code = `@prefix : <http://example.org/> .`;
-  const codeUri = "/workspace/model.ttl";
-
-  const e = await addEditor(
-    codeUri,
-    code,
-    turtleExtension,
-    document.getElementById("monaco-editor-root")!,
-  );
-
-  // Language client configuration
-  await setupLsp(turtleExtension.id, sparqlLdExtension.id, jsonLdExtension.id);
-};
-
-runClient();
