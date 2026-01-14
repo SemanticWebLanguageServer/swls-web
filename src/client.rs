@@ -60,6 +60,7 @@ impl FsTrait for WebFs {
     }
 
     async fn read_file(&self, url: &lsp_types::Url) -> Option<String> {
+        tracing::info!("Reading {}", url);
         match self
             .0
             .send_request::<ReadFile>(ReadFileParams { url: url.clone() })
@@ -78,6 +79,7 @@ impl FsTrait for WebFs {
     }
 
     async fn glob_read(&self, glob: &str) -> Option<Vec<File>> {
+        tracing::info!("GLob reading {}", glob);
         Some(vec![])
     }
 

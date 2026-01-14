@@ -49,7 +49,7 @@ class LspDeframer {
       }
 
       // Remove processed message from buffer
-      this.buffer = this.buffer.slice(bodyEnd);
+      this.buffer = this.buffer.slice(bodyEnd - 1);
     }
   }
 }
@@ -62,8 +62,7 @@ async function ensureLspLoaded() {
   if (!initialized) {
     console.log("[worker] importing swls-web…");
     const mod = await import("swls-wasm");
-    console.dir(mod);
-    const t = new mod.WasmLsp((x) => deframer.push(x));
+    const t = new mod.WasmLsp((x) => deframer.push(x), console.log);
     initialized = true;
     send_to_lsp = t.send.bind(t);
   }

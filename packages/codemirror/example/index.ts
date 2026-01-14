@@ -32,7 +32,7 @@ const runClient = async () => {
 
   thing.getLanguageClient()!.onRequest("custom/readFile", (a, b, c) => {
     // You can return generated files here
-    console.log(a, b, c);
+    console.log("read", a, b, c);
     throw "nah";
   });
 };

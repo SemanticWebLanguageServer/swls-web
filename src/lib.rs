@@ -2,16 +2,24 @@
     html_logo_url = "https://ajuvercr.github.io/semantic-web-lsp/assets/icons/favicon.png",
     html_favicon_url = "https://ajuvercr.github.io/semantic-web-lsp/assets/icons/favicon.ico"
 )]
+
 mod channels;
 mod client;
 mod fetch;
 
-use std::io::Write;
+use once_cell::unsync::Lazy;
+
+use std::{
+    cell::RefCell,
+    io::Write,
+    rc::Rc,
+    sync::{Arc, Mutex},
+};
 
 use bevy_ecs::{resource::Resource, world::World};
 use client::{WebClient, WebFs};
 use futures::{
-    channel::mpsc::{self, unbounded, UnboundedSender},
+    channel::mpsc::{unbounded, UnboundedSender},
     StreamExt,
 };
 use lsp_core::lsp_types::SemanticTokenType;
@@ -23,18 +31,28 @@ use wasm_bindgen_futures::spawn_local;
 
 use crate::channels::{WasmLspStdin, WasmLspStdout};
 
+type LogSink = dyn Fn(String);
+thread_local! {
+    static LOG_SINK: Rc<RefCell<Box<LogSink>>> =
+        Rc::new(RefCell::new(Box::new(|msg| {
+            web_sys::console::log_1(&msg.into());
+        })));
+}
+
 struct LogItWriter;
 impl LogItWriter {
     fn new() -> Self {
         LogItWriter
     }
 }
+
 impl Write for LogItWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         match std::str::from_utf8(buf) {
             Ok(st) => {
-                // web_sys::console::log_1(&st.into())
-                // debug(st);
+                LOG_SINK.with(|sink| {
+                    (sink.borrow())(st.to_string());
+                });
             }
             Err(e) => web_sys::console::log_1(&format!("Invalid string logged {:?}", e).into()),
         }
@@ -120,7 +138,17 @@ pub struct WasmLsp {
 impl WasmLsp {
     /// JS must pass a callback for receiving messages from Rust/WASM.
     #[wasm_bindgen(constructor)]
-    pub fn new(post_message_cb: js_sys::Function) -> WasmLsp {
+    pub fn new(post_message_cb: js_sys::Function, debug_cb: Option<js_sys::Function>) -> WasmLsp {
+        {
+            if let Some(debug_cb) = debug_cb {
+                LOG_SINK.with(move |sink| {
+                    *sink.borrow_mut() = Box::new(move |st| {
+                        let _ = debug_cb.call1(&JsValue::NULL, &JsValue::from_str(&st));
+                    });
+                });
+            }
+        }
+
         let (from_js_tx, from_js_rx) = unbounded::<Vec<u8>>();
         let (to_js_tx, mut to_js_rx) = unbounded::<Vec<u8>>();
 
@@ -132,7 +160,6 @@ impl WasmLsp {
         // spawn forwarding task
         spawn_local(async move {
             while let Some(bytes) = to_js_rx.next().await {
-                web_sys::console::log_1(&"Sending bytes to js".into());
                 let text = String::from_utf8_lossy(&bytes);
                 let _ = post_message_cb.call1(&JsValue::NULL, &JsValue::from_str(&text));
             }
@@ -154,7 +181,6 @@ impl WasmLsp {
     /// Send a message from JS → LSP.
     #[wasm_bindgen]
     pub fn send(&self, msg: &str) {
-        web_sys::console::log_1(&"Got msg from js".into());
         let _ = self.from_js_tx.unbounded_send(msg.as_bytes().to_vec());
     }
 }

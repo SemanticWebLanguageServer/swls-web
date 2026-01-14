@@ -36,11 +36,12 @@ export async function setupVscodeApi() {
     logLevel: LogLevel.Debug,
     userConfiguration: {
       json: JSON.stringify({
-        "editor.experimental.asyncTokenization": true,
+        // "editor.experimental.asyncTokenization": true,
         "editor.semanticHighlighting.enabled": true,
       }),
     },
     advanced: {
+      loadThemes: true,
       enforceSemanticHighlighting: true,
     },
   };
@@ -69,6 +70,13 @@ export async function setupLsp(
     languageId: "swls",
     clientOptions: {
       documentSelector: languageIds,
+      initializationOptions: {
+        ontologies: [
+          "preload:///home/silvius/test.ttl",
+          "http://semweb.mmlab.be/ns/rml#",
+          "https://kg-construct.github.io/rml-core/ontology/documentation/ontology.ttl",
+        ],
+      },
     },
     connection: {
       options: {
@@ -81,6 +89,14 @@ export async function setupLsp(
 
   // Start language client wrapper
   const languageClientWrapper = new LanguageClientWrapper(languageClientConfig);
+  console.log("lcw", languageClientWrapper.getLanguageClient());
+  // languageClientWrapper
+  //   .getLanguageClient()!
+  //   .onRequest("custom/readFile", (a, b, c) => {
+  //     // You can return generated files here
+  //     console.log("read", a, b, c);
+  //     throw "nah";
+  //   });
   await languageClientWrapper.start();
   return languageClientWrapper;
 }

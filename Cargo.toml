@@ -1,6 +1,6 @@
 [package]
 name = "swls-wasm"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["ajuvercr <arthur.vercruysse@outlook.com>"]
 edition = "2018"
 
@@ -40,6 +40,7 @@ lang-turtle = { path = "../swls/lang-turtle/" }
 lang-sparql = { path = "../swls/lang-sparql/" }
 lsp-core    = { path = "../swls/core/", default-features = false, features = [] }
 once_cell = "1.21.3"
+lazy_static = "1.5.0"
 
 [dependencies.wasm-bindgen]
 features = ["serde", "serde-serialize", "serde_json"]
