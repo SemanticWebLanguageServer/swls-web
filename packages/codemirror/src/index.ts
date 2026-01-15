@@ -21,8 +21,6 @@ import { editor } from "@codingame/monaco-vscode-editor-api";
 import * as monaco from "@codingame/monaco-vscode-editor-api";
 import { URI } from "@codingame/monaco-vscode-api/vscode/vs/base/common/uri";
 
-const workerUrl = "./lsp-worker.js";
-
 /**
  * Default way to setup the vscode api, adding turtle, sparql and jsonld extensions.
  */
@@ -53,11 +51,16 @@ export async function setupVscodeApi() {
   monaco.languages.register(jsonLdExtension);
 }
 
+export type LspOptions = {
+  ontologies?: string[];
+  shapes?: string[];
+};
 /**
  * Sets up the semantic web language server that can handle the provided language ids.
  */
 export async function setupLsp(
-  url: URL = new URL(workerUrl, import.meta.url),
+  url: URL,
+  options: LspOptions,
   ...languageIds: string[]
 ): Promise<LanguageClientWrapper> {
   const worker = new Worker(url, {
@@ -70,13 +73,7 @@ export async function setupLsp(
     languageId: "swls",
     clientOptions: {
       documentSelector: languageIds,
-      initializationOptions: {
-        ontologies: [
-          "preload:///home/silvius/test.ttl",
-          "http://semweb.mmlab.be/ns/rml#",
-          "https://kg-construct.github.io/rml-core/ontology/documentation/ontology.ttl",
-        ],
-      },
+      initializationOptions: options,
     },
     connection: {
       options: {
@@ -89,14 +86,6 @@ export async function setupLsp(
 
   // Start language client wrapper
   const languageClientWrapper = new LanguageClientWrapper(languageClientConfig);
-  console.log("lcw", languageClientWrapper.getLanguageClient());
-  // languageClientWrapper
-  //   .getLanguageClient()!
-  //   .onRequest("custom/readFile", (a, b, c) => {
-  //     // You can return generated files here
-  //     console.log("read", a, b, c);
-  //     throw "nah";
-  //   });
   await languageClientWrapper.start();
   return languageClientWrapper;
 }

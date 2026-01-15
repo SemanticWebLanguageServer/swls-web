@@ -7,14 +7,9 @@ mod channels;
 mod client;
 mod fetch;
 
-use once_cell::unsync::Lazy;
+use js_sys::Uint8Array;
 
-use std::{
-    cell::RefCell,
-    io::Write,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, io::Write, rc::Rc};
 
 use bevy_ecs::{resource::Resource, world::World};
 use client::{WebClient, WebFs};
@@ -160,8 +155,8 @@ impl WasmLsp {
         // spawn forwarding task
         spawn_local(async move {
             while let Some(bytes) = to_js_rx.next().await {
-                let text = String::from_utf8_lossy(&bytes);
-                let _ = post_message_cb.call1(&JsValue::NULL, &JsValue::from_str(&text));
+                let buffer = Uint8Array::from(bytes.as_slice());
+                let _ = post_message_cb.call1(&JsValue::NULL, &buffer);
             }
         });
 
