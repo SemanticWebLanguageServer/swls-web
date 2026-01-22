@@ -1,5 +1,5 @@
 {
-  "name": "slws-monorepo",
+  "name": "swls-monorepo",
   "private": true,
   "workspaces": [
     "packages/*"

@@ -8,6 +8,7 @@ mod client;
 mod fetch;
 
 use js_sys::Uint8Array;
+use tracing_subscriber::fmt::format::json;
 
 use std::{cell::RefCell, io::Write, rc::Rc};
 
@@ -64,7 +65,7 @@ fn setup_global_subscriber() {
     use tracing_subscriber::prelude::*;
 
     let fmt_layer = tracing_subscriber::fmt::layer()
-        .pretty()
+        .json()
         .with_ansi(false)
         .without_time() // std::time is not available in browsers
         .with_writer(std::sync::Mutex::new(LogItWriter::new()))

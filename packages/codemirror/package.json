@@ -1,6 +1,6 @@
 {
   "name": "swls-codemirror",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "lib/index.js",
   "type": "module",
   "scripts": {
@@ -15,7 +15,7 @@
   "dependencies": {
     "@codingame/monaco-vscode-api": "^23.2.2",
     "monaco-languageclient": "~10.4.0",
-    "swls-wasm": "^0.2.1",
+    "swls-wasm": "file:../swls-wasm",
     "vscode-languageserver": "~9.0.1"
   },
   "devDependencies": {
