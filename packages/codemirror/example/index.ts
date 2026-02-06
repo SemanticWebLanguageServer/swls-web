@@ -36,12 +36,29 @@ const runClient = async () => {
         new URL(semwebUrl, window.location.origin).toString(),
         new URL(kgcOntology, window.location.origin).toString(),
       ],
-      shapes: [new URL(kgcShapes, window.location.origin).toString()],
+      shapes: [
+        // new URL(kgcShapes, window.location.origin).toString(),
+        "https://raw.githubusercontent.com/kg-construct/rml-resources/refs/heads/main/shapes.ttl",
+      ],
     },
     turtleExtension.id,
     sparqlLdExtension.id,
     jsonLdExtension.id,
   );
+
+  e.getEditor()?.onDidChangeModelContent((e) => {
+    setTimeout(async () => {
+      console.log("Sending save request");
+      await thing
+        .getLanguageClient()!
+        .sendNotification("textDocument/didSave", {
+          textDocument: {
+            url: "inmemory://app/model.ttl",
+          },
+        });
+      console.log("Sent save request");
+    }, 100);
+  });
 
   thing.getLanguageClient()!.onRequest("custom/readFile", (a, b, c) => {
     // You can return generated files here

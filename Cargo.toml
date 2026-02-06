@@ -1,6 +1,6 @@
 [package]
 name = "swls-wasm"
-version = "0.2.2"
+version = "0.2.4"
 authors = ["ajuvercr <arthur.vercruysse@outlook.com>"]
 edition = "2018"
 
@@ -38,7 +38,7 @@ pin-project = "1"
 lang-jsonld = { path = "../swls/lang-jsonld/" }
 lang-turtle = { path = "../swls/lang-turtle/" }
 lang-sparql = { path = "../swls/lang-sparql/" }
-lsp-core    = { path = "../swls/core/", default-features = false, features = [] }
+lsp-core    = { path = "../swls/core/", features = [] }
 once_cell = "1.21.3"
 lazy_static = "1.5.0"
 
