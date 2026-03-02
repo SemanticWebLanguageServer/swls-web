@@ -11,7 +11,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "swls-codemirror": "file:.."
+    "swls-codemirror": "file:..",
+    "swls-monaco": "file:.."
   },
   "devDependencies": {
     "@codingame/esbuild-import-meta-url-plugin": "^1.0.3",
